@@ -15,7 +15,8 @@ class BuyerController extends Controller
      */
     public function index()
     {
-        //
+        $buyer = Buyer::has('transactions')->get();
+        return response()->json(['data' => $buyer], 200);
     }
 
     /**
@@ -35,9 +36,10 @@ class BuyerController extends Controller
      * @param  \App\Buyer  $buyer
      * @return \Illuminate\Http\Response
      */
-    public function show(Buyer $buyer)
+    public function show($id)
     {
-        //
+        $buyer = Buyer::has('transactions')->findOrFail($id);
+        return response()->json(['data' => $buyer], 200);
     }
 
     /**

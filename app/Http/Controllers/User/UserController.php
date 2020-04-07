@@ -15,7 +15,9 @@ class UserController extends Controller
      */
     public function index()
     {
-        //
+        return response()->json([
+            'data' => User::get(),
+        ], 200);
     }
 
     /**
@@ -26,7 +28,23 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $rules = [
+            'name' => 'required',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|min:8|confirmed',
+        ];
+
+        $this->validate($request, $rules);
+
+        $data = $request->all();
+        $data['password'] = bcrypt($request->password);
+        $data['email_verified_at'] = User::UNVERIFIED_USER;
+        $data['verification_token'] = User::generateVerificationCode();
+        $data['admin'] = User::REGULAR_USER;
+
+        $user = User::create($data);
+
+        return response()->json(['data' => $user], 201);
     }
 
     /**
@@ -35,9 +53,11 @@ class UserController extends Controller
      * @param  \App\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function show(User $user)
+    public function show($id)
     {
-        //
+        $user = User::findOrFail($id);
+
+        return response()->json(['data' => $user], 200);
     }
 
     /**
@@ -47,9 +67,40 @@ class UserController extends Controller
      * @param  \App\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, User $user)
+    public function update(Request $request, $id)
     {
-        //
+       $user = User::findOrFail($id);
+
+        $rules = [
+            'email' => 'email|unique:users,' . $user,
+            'password' => 'min:8|confirmed',
+            'admin' => 'in:' . User::ADMIN_USER . ',' . User::REGULAR_USER
+        ];
+
+        if($request->has('name')) {
+            $user->name = $request('name');
+        }
+        if($request->has('email') && $user->email != $request->email) {
+            $user->email_verified_at = User::UNVERIFIED_USER;
+            $user->verification_token = User::generateVerificationCode();
+            $user->email = $request->email;
+        }
+        if($user->has('password')) {
+            $user->password = bcrypt($request->password);
+        }
+        if($request->has('admin')) {
+            if(!$user->isVerified()) {
+                return response()->json(['error' => 'Only verified users can modify the admin field', 'code' => 409], 409);
+            }
+            $user->admin = $request->admin;
+        }
+
+        if(!$user->isDirty()) {
+            return response()->json(['error' => '', 'code' => 422], 422);
+        }
+        $user->save();
+
+        return response()->json(['data' => $user], 200);
     }
 
     /**
@@ -60,6 +111,8 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        //
+        $user->delete();
+
+        return response()->json(['data' => $user], 200);
     }
 }
