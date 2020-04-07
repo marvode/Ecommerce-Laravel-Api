@@ -13,14 +13,14 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-Route::resource('user', 'User\UserController', ["except" => ["create", "edit"]]);
+Route::resource('users', 'User\UserController', ["except" => ["create", "edit"]]);
 
-Route::resource('buyer', 'Buyer\BuyerController', ["only" => ["index", "show"]]);
+Route::resource('buyers', 'Buyer\BuyerController', ["only" => ["index", "show"]]);
 
-Route::resource('seller', 'Seller\SellerController', ["only" => ["index", "show"]]);
+Route::resource('sellers', 'Seller\SellerController', ["only" => ["index", "show"]]);
 
-Route::resource('product', 'Product\ProductController', ["only" => ["index", "show"]]);
+Route::resource('products', 'Product\ProductController', ["only" => ["index", "show"]]);
 
-Route::resource('category', 'Category\CategoryController', ["except" => ["create", "edit"]]);
+Route::resource('categorys', 'Category\CategoryController', ["except" => ["create", "edit"]]);
 
-Route::resource('transaction', 'Transaction\TransactionController', ["only" => ["index", "show"]]);
+Route::resource('transactions', 'Transaction\TransactionController', ["only" => ["index", "show"]]);
