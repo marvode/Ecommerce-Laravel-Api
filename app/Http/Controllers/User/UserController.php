@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\User;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\ApiController;
 use App\User;
 use Illuminate\Http\Request;
 
-class UserController extends Controller
+class UserController extends ApiController
 {
     /**
      * Display a listing of the resource.
@@ -15,9 +15,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        return response()->json([
-            'data' => User::get(),
-        ], 200);
+        return $this->showAll(User::get());
     }
 
     /**
@@ -44,7 +42,7 @@ class UserController extends Controller
 
         $user = User::create($data);
 
-        return response()->json(['data' => $user], 201);
+        return $this->showOne($user, 201);
     }
 
     /**
@@ -55,9 +53,7 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        $user = User::findOrFail($id);
-
-        return response()->json(['data' => $user], 200);
+        return $this->showOne(User::findOrFail($id));
     }
 
     /**
@@ -77,6 +73,8 @@ class UserController extends Controller
             'admin' => 'in:' . User::ADMIN_USER . ',' . User::REGULAR_USER
         ];
 
+        $this->validate($request, $rules);
+
         if($request->has('name')) {
             $user->name = $request('name');
         }
@@ -90,17 +88,17 @@ class UserController extends Controller
         }
         if($request->has('admin')) {
             if(!$user->isVerified()) {
-                return response()->json(['error' => 'Only verified users can modify the admin field', 'code' => 409], 409);
+                return $this->errorResponse('Only verified users can modify the admin field', 409);
             }
             $user->admin = $request->admin;
         }
 
         if(!$user->isDirty()) {
-            return response()->json(['error' => '', 'code' => 422], 422);
+            return $this->errorResponse('You need to specify a different value to update', 422);
         }
         $user->save();
 
-        return response()->json(['data' => $user], 200);
+        return $this->showOne($user);
     }
 
     /**
@@ -113,6 +111,6 @@ class UserController extends Controller
     {
         $user->delete();
 
-        return response()->json(['data' => $user], 200);
+        return $this->showOne($user);
     }
 }
