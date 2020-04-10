@@ -35,9 +35,9 @@ class SellerController extends ApiController
      * @param  \App\Seller  $seller
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Seller $seller)
     {
-        return $this->showOne(Seller::has('products')->findOrFail($id));
+        return $this->showOne($seller);
     }
 
     /**
