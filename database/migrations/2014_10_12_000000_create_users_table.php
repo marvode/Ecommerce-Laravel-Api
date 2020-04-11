@@ -23,6 +23,7 @@ class CreateUsersTable extends Migration
             $table->dateTime('email_verified_at')->nullable();
             $table->string('verification_token')->nullable();
             $table->string('admin')->default(User::REGULAR_USER);
+            $table->softDeletes();
             $table->timestamps();
         });
     }
