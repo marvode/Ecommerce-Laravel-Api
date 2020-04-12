@@ -16,6 +16,16 @@ class Product extends Model
     protected $fillable = ['name', 'description', 'quantity', 'status', 'image', 'seller_id'];
     protected $hidden = ['pivot'];
 
+    protected static function booted()
+    {
+        static::updated(function ($product) {
+            if ($product->quantity == 0 && $product->isAvailable()) {
+                $product->status = Product::UNAVAILABLE_PRODUCT;
+                $product->save();
+            }
+        });
+    }
+
     public function isAvailable() {
         return $this->status == Product::AVAILABLE_PRODUCT;
     }
